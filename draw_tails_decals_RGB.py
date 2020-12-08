@@ -129,7 +129,7 @@ def drawtail_decals_RGB(RA_col,Dec_col):
                     ypoint = (points[1,1] - points[0,1]) 
                     xpoint = (points[1,0] - points[0,0]) * np.cos(Dec_col[row] * math.pi/180)
                 
-                    theta = math.m(ypoint,xpoint)  # Calculate angle (theta) in radian. atan2 defines polar angle from right 
+                    theta = math.atan2(ypoint,xpoint)  # Calculate angle (theta) in radian. atan2 defines polar angle from right 
                     theta = round(180 * theta/math.pi,0) # Converting theta from radian to degree and round it. No one likes radians
                     
                     # Add in a line to show the zero point, and highlight the angle to help the user see what they've done

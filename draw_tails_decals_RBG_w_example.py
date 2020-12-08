@@ -137,9 +137,9 @@ def drawtail_decals_RGB(RA_col,Dec_col):
                     # It comes from the centre click in case the galaxy isn't centred
                     # It should be able to work with either click being the centre, because lines do that 
                     ypoint = (points[1,1] - points[0,1]) 
-                    xpoint = (points[1,0] - points[0,0])
+                    xpoint = (points[1,0] - points[0,0]) * np.cos(Dec_col[row] * math.pi/180)
                 
-                    theta = math.m(ypoint,xpoint)  # Calculate angle (theta) in radian. atan2 defines polar angle from right 
+                    theta = math.atan2(ypoint,xpoint)  # Calculate angle (theta) in radian. atan2 defines polar angle from right 
                     theta = round(180 * theta/math.pi,0) # Converting theta from radian to degree and round it. No one likes radians
                     
                     # Add in a line to show the zero point, and highlight the angle to help the user see what they've done
@@ -264,7 +264,7 @@ example_table['tail_angle_JC'] = tail_ang_val
 # Mark in a BCG/central position
 BCG_RA =  194.953054 # X-ray centre position of Coma
 BCG_Dec = 27.980694
-example_table['RA_offset'] =  BCG_RA - example_table.RA # RA needs to be backwards
+example_table['RA_offset'] =  (BCG_RA - example_table.RA) * np.cos((example_table.Dec + BCG_Dec)/2 * math.pi/180) # RA needs to be backwards
 example_table['DEC_offset'] = example_table.Dec - BCG_Dec
 
 # Calculate the angle between the Galaxy and the central point. It uses a loop, which I could
