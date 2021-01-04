@@ -297,13 +297,13 @@ for i in range(len(example_table)):
     
     # If the galaxy is the BCG, with a very small difference, then assume it's zero
     # In these cases, the tail angle = tail offset. BCGs shouldn't have tails though.
-    if abs(dra.value) < 1e-8 and abs(ddec.value) < 1e-8:
+    if abs(dra[i].value) < 1e-8 and abs(ddec[i].value) < 1e-8:
         BCG_angle_sky.append(0.0)
     else:
         # Use the atan2 function to calculate the angle based on a y and x coordinate.
         # Also need to convert to degrees, and round it.
         # Make the ra a negative to match the cartesian way the angles are measured (left to right)
-        BCG_angle_sky.append(round(180 * math.atan2(ddec.value,-(dra.value))/math.pi,0))
+        BCG_angle_sky.append(round(180 * math.atan2(ddec[i].value,-(dra[i].value))/math.pi,0))
         ## IF you wanted to have separate BCG coordinates that are linked with the galaxy coordinates
         # BCG_angle_sky.append(round(180 * math.atan2(ddec.value,-(dra.value))/math.pi,0))
 
@@ -319,16 +319,24 @@ tail_offset = [] # Create the list to append to the base table later
 for i in range(len(example_table)):
     # Only select where a galaxy is a JF and we are confident about a tail
     if example_table.tail_confidence_JC[i] > 0 and example_table.JF_flag_JC[i] == 1:
-        # Use the absolute value as we don't care about +/-
-        tail_angle_diff = abs(example_table.tail_angle_JC[i] - example_table.BCG_angle_sky[i])
         
-        # If angles are bigger than 180 degrees then take the remainder of the circle (to keep within 180)
-        if tail_angle_diff > 180:
-            tail_angle_diff = abs(360 - tail_angle_diff)
+        # Check if the BCG sky angle is zero - these are BCGs and the tail offset is likely meaningless
+        if example_table.BCG_angle_sky[i] == 0:
+            tail_angle_diff = math.nan # BCGs will have NaN for the tail offsets
+            
+        else:
+            # When the galaxy isn't a BCG thencalculate the difference between tail_angle and BCG_angle
+            # Use the absolute value as we don't care about +/-
+            tail_angle_diff = abs(example_table.tail_angle_JC[i] - example_table.BCG_angle_sky[i])
+        
+            # If angles are bigger than 180 degrees then take the remainder of the circle (to keep within 180)
+            if tail_angle_diff > 180:
+                tail_angle_diff = abs(360 - tail_angle_diff)
             
         # Append the BCG tail offset 
         tail_offset.append(tail_angle_diff)
-    # If the conditions aren't met assign zero
+        
+    # If the galaxy isn't a jellyfish galaxy, or the tail can't be found, assign zero offset
     else:
         tail_offset.append(0)
 
