@@ -20,14 +20,16 @@ This sources an image each time, so takes the longest time.
 The user input is based on questions which all need to be answered. 
 The user needs to confirm each galaxy before it will move on. Currently, the  entire input lists are looped over, 
 so the user is advised to sit down, and get comfy if a large number of galaxies needs to be classified. 
+Alternatively, break up the input files into separate chunks and run the function on each one.
 A potential save progress feature may be added later (although that doesn't help you now does it).
 
 Also, the use of interactive plot mode for marking the points (command ion), does not play well with some
 IDEs and python GUI interfaces. There may be problems with programs like spyder and jupiter notebooks when using
 this. This is likely due to settings these IDEs have settings which don't play nicely with interactive plotting.
-If in doubt, just use an ipython terminal window, which seems to work fine.
+If in doubt, just use a python/ipython terminal window, which seems to work fine.
 
-Two suggestions which might help it run in jupyter notebooks:
+Two suggestions to add to the start of the code to run in jupyter notebooks and/or spyder:
+    
 %matplotlib qt
 
 and/or 
@@ -35,12 +37,16 @@ and/or
 import matplotlib
 matplotlib.use('TkAgg')
 
-Try these at your own risk
+Try these at your own risk :)
+
+Update 30/12/2020:
+Included astropy sky coordinates to better calculate BCG offsets. This currently uses a single offset point, but
+can be easily changed to a BCG_coord column if necessary.
 
 author: Jake Crossett
 """
 
-# Required libraries
+# Required libraries for the function
 import math
 import numpy as np
 from matplotlib import pyplot as plt
@@ -52,6 +58,8 @@ from PIL import Image
 # Only needed for the CSV example. 
 # Can use other forms of input data if needed. I will always use pandas though
 import pandas as pd
+from astropy import units as u
+from astropy.coordinates import SkyCoord
 
 
 #### Function start ####
@@ -137,7 +145,8 @@ def drawtail_decals_RGB(RA_col,Dec_col):
                     # It comes from the centre click in case the galaxy isn't centred
                     # It should be able to work with either click being the centre, because lines do that 
                     ypoint = (points[1,1] - points[0,1]) 
-                    xpoint = (points[1,0] - points[0,0]) * np.cos(Dec_col[row] * math.pi/180)
+                    xpoint = (points[1,0] - points[0,0]) # * np.cos(Dec_col[row] * math.pi/180) # To scale RA away from the equator. 
+                                                         # I don't think we need to do this here
                 
                     theta = math.atan2(ypoint,xpoint)  # Calculate angle (theta) in radian. atan2 defines polar angle from right 
                     theta = round(180 * theta/math.pi,0) # Converting theta from radian to degree and round it. No one likes radians
@@ -264,20 +273,38 @@ example_table['tail_angle_JC'] = tail_ang_val
 # Mark in a BCG/central position
 BCG_RA =  194.953054 # X-ray centre position of Coma
 BCG_Dec = 27.980694
-example_table['RA_offset'] =  (BCG_RA - example_table.RA) * np.cos((example_table.Dec + BCG_Dec)/2 * math.pi/180) # RA needs to be backwards
-example_table['DEC_offset'] = example_table.Dec - BCG_Dec
+
+# Convert table coordinates into sky coordinates in astropy
+Coord_sky = SkyCoord(example_table.RA*u.deg, example_table.Dec*u.deg, frame='icrs')
+# Sky Coords of the BCG. Can be done for different group centres by calling them as above
+BCG_sky = SkyCoord(BCG_RA*u.deg, BCG_Dec*u.deg, frame='icrs') 
+
+## If you wanted to have separate BCG coordinates that are linked with the galaxy coordinates
+# BCG_sky = SkyCoord(example_table.BCGRA*u.deg, example_table.BCGDec*u.deg, frame='icrs')
+
+
+BCG_angle_sky = [] # Create the list to append to the base table later
 
 # Calculate the angle between the Galaxy and the central point. It uses a loop, which I could
 # probably improve on, but that is left as an exercise for the reader
 
-BCG_angle = [] # Create the list to append to the base table later
-
 for i in range(len(example_table)):
-    # Use the atan2 function to calculate the angle based on a y and x coordinate.
-    # Also need to convert to degrees, and round it.
-    BCG_angle.append(round(180 * math.atan2(example_table.DEC_offset[i],example_table.RA_offset[i])/math.pi,0))
-example_table['BCG_angle'] =  BCG_angle
+    # Find the spherical offset between the BCG and 
+    dra, ddec = BCG_sky.spherical_offsets_to(Coord_sky[i]) 
+    
+    # If the galaxy is the BCG, with a very small difference, then assume it's zero
+    # In these cases, the tail angle = tail offset. BCGs shouldn't have tails though.
+    if abs(dra.value) < 1e-8 and abs(ddec.value) < 1e-8:
+        BCG_angle_sky.append(0.0)
+    else:
+        # Use the atan2 function to calculate the angle based on a y and x coordinate.
+        # Also need to convert to degrees, and round it.
+        # Make the ra a negative to match the cartesian way the angles are measured (left to right)
+        BCG_angle_sky.append(round(180 * math.atan2(ddec.value,-(dra.value))/math.pi,0))
+        ## IF you wanted to have separate BCG coordinates that are linked with the galaxy coordinates
+        # BCG_angle_sky.append(round(180 * math.atan2(ddec.value,-(dra.value))/math.pi,0))
 
+example_table['BCG_angle_sky'] = BCG_angle_sky
 
 # Calculate the difference between the JF tail angle, and the BCG angle
 # This should give the tail offset. Two angles are calculated, one which 
@@ -290,7 +317,7 @@ for i in range(len(example_table)):
     # Only select where a galaxy is a JF and we are confident about a tail
     if example_table.tail_confidence_JC[i] > 0 and example_table.JF_flag_JC[i] == 1:
         # Use the absolute value as we don't care about +/-
-        tail_angle_diff = abs(example_table.tail_angle_JC[i] - example_table.BCG_angle[i])
+        tail_angle_diff = abs(example_table.tail_angle_JC[i] - example_table.BCG_angle_sky[i])
         
         # If angles are bigger than 180 degrees then take the remainder of the circle (to keep within 180)
         if tail_angle_diff > 180:
@@ -305,6 +332,8 @@ for i in range(len(example_table)):
 # Make the tail offset. The angle is the angular deviation from the BCG galaxy vector (i.e. a tail pointing to a BCG is 180)
 example_table['tail_offset_deviation_JC'] = tail_offset
 # If you want the tail angle as an angle away from the BCG (i.e. a tail pointing to the BCG is zero degrees)
+# Note, this means that all the non-Jellyfish tail measurements will be set to 180 degrees.
+# Do not include them in any results! This should be fine if you select tail_confidence > 0
 example_table['tail_offset_BCG_JC'] = 180 - example_table.tail_offset_deviation_JC
 
 # Select only the galaxies with confident tails
