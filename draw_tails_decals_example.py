@@ -242,13 +242,15 @@ Use x,y,z = drawtail_decals_RGB(RA,Dec) as the command to run it.
 
 # Load in example table using pandas
 # Can use other means (loadtxt, genfromtxt etc etc) which might be faster
-example_table = pd.read_csv('Coma_JF_not_Roberts.csv')
+# example_table = pd.read_csv('Coma_JF_not_Roberts.csv')
+example_table = pd.read_csv('Tuts_JF_high_BCG.csv')
 
-# Run the function and output to variables
 
 ######## This is an example use of the code ##########
+# Run the function and output to variables
 jf_flag_val,tail_confid,tail_ang_val = drawtail_decals_RGB(example_table.RA,example_table.Dec) 
 ######################################################
+
 
 # Append the columns to the table and mark with my name in case of multiple classifiers
 # This step can probably be combined with the function, but I'm making it 2 steps
@@ -270,17 +272,18 @@ example_table['tail_angle_JC'] = tail_ang_val
 # More example plotting stuff. You really don't have to use this if you don't want to
 # If one knows a BCG/central position, you can calculate the angular offset from the BCG
 
-# Mark in a BCG/central position
-BCG_RA =  194.953054 # X-ray centre position of Coma
-BCG_Dec = 27.980694
-
 # Convert table coordinates into sky coordinates in astropy
 Coord_sky = SkyCoord(example_table.RA*u.deg, example_table.Dec*u.deg, frame='icrs')
-# Sky Coords of the BCG. Can be done for different group centres by calling them as above
-BCG_sky = SkyCoord(BCG_RA*u.deg, BCG_Dec*u.deg, frame='icrs') 
 
-## If you wanted to have separate BCG coordinates that are linked with the galaxy coordinates
-# BCG_sky = SkyCoord(example_table.BCGRA*u.deg, example_table.BCGDec*u.deg, frame='icrs')
+# If all galaxies are in a single cluster then input the centre position of the cluster
+# Mark in a BCG/central position
+# BCG_RA =  194.953054 # X-ray centre position of Coma
+# BCG_Dec = 27.980694
+# BCG_sky = SkyCoord(BCG_RA*u.deg, BCG_Dec*u.deg, frame='icrs') 
+
+# If you wanted to have separate BCG coordinates that are linked with the galaxy coordinates 
+# (need to be included as columns in the example table)
+BCG_sky = SkyCoord(example_table.BCGRA*u.deg, example_table.BCGDec*u.deg, frame='icrs')
 
 
 BCG_angle_sky = [] # Create the list to append to the base table later
