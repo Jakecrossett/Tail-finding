@@ -141,7 +141,7 @@ def drawtail_decals_RGB(RA_col,Dec_col):
                     # It comes from the centre click in case the galaxy isn't centred
                     # It should be able to work with either click being the centre, because lines do that 
                     ypoint = (points[1,1] - points[0,1]) 
-                    xpoint = (points[1,0] - points[0,0]) # * np.cos(Dec_col[row] * math.pi/180) # To scale RA away from the equator. 
+                    xpoint = (points[1,0] - points[0,0]) * np.cos(Dec_col[row] * math.pi/180) # To scale RA away from the equator. 
                                                          # I don't think we need to do this here
                 
                     theta = math.atan2(ypoint,xpoint)  # Calculate angle (theta) in radian. atan2 defines polar angle from right 
