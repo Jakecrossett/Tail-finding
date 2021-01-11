@@ -146,7 +146,6 @@ def drawtail_decals_RGB(RA_col,Dec_col):
                     # It should be able to work with either click being the centre, because lines do that 
                     ypoint = (points[1,1] - points[0,1]) 
                     xpoint = (points[1,0] - points[0,0]) * np.cos(Dec_col[row] * math.pi/180) # To scale RA away from the equator. 
-                                                         # I don't think we need to do this here
                 
                     theta = math.atan2(ypoint,xpoint)  # Calculate angle (theta) in radian. atan2 defines polar angle from right 
                     theta = round(180 * theta/math.pi,0) # Converting theta from radian to degree and round it. No one likes radians
@@ -156,6 +155,8 @@ def drawtail_decals_RGB(RA_col,Dec_col):
                     plt.pause(0.1) #Pause to see the result
                     
                     print('This is a Jellyfish with a tail at ', theta)  # Confirm the classification   
+                    # Note that the printed angle will not match the image, due to the fixing of the RA scale.
+                    # This is not mentioned to the user, so it might look off at high/low declination.
 
                     # Ask to finish the classification
                     FinishQ = input('Save and go next?: ' ).lower()
