@@ -244,7 +244,7 @@ Use x,y,z = drawtail_decals_RGB(RA,Dec) as the command to run it.
 # Load in example table using pandas
 # Can use other means (loadtxt, genfromtxt etc etc) which might be faster
 # example_table = pd.read_csv('Coma_JF_not_Roberts.csv')
-example_table = pd.read_csv('Tuts_JF_high_BCG.csv')
+example_table = pd.read_csv('Example_tail_file.csv')
 
 
 ######## This is an example use of the code ##########
