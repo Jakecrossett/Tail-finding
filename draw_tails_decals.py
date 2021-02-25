@@ -40,6 +40,16 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 Try these at your own risk :)
+    
+    
+Update 30/12/2020:
+Included astropy sky coordinates to better calculate BCG offsets. This currently uses a single offset point, but
+can be easily changed to a BCG_coord column if necessary.
+
+Update 11/1/2021:
+Fixed deltaRA and deltaDec to use astropy coordinates. This means the lines will not appear to match the 
+final angles at high/low Declinations. The angles are converted based on the image having the declination dependance
+on the field of view.
 
 author: Jake Crossett
 """
@@ -229,22 +239,29 @@ def drawtail_decals_RGB(RA_col,Dec_col):
         
     return(jellyfish_flag_list,tail_confidence,tail_angle_list) #Returns all values
 ##################################################################
+######## This is an example use of the code ##########
+# Example useage# Load in example table using pandas
+# Can use other means (loadtxt, genfromtxt etc etc) which might be faster
+example_table = pd.read_csv('Coma_JF_not_Roberts.csv') # Load in table
 
-# Example useage with Tuts galaxies
-JF_table = pd.read_csv('Tuts_JF_high_BCG.csv') # Load in table
+# Run the function and output to variables
+jf_flag_val,tail_confid,tail_ang_val = drawtail_decals_RGB(example_table.RA,example_table.Dec)
 
-jf_flag_val,tail_confid,tail_ang_val = drawtail_decals_RGB(JF_table.RA,JF_table.Dec) #Run the code and output to variables
-
-# Append the columns and mark with my name in case of multiple classifiers
-JF_table['JF_flag_JC'] = jf_flag_val
-JF_table['tail_confidence_JC'] = tail_confid
-JF_table['tail_angle_JC'] = tail_ang_val
+# Append the columns to the table and mark with my name in case of multiple classifiers
+# This step can probably be combined with the function, but I'm making it 2 steps
+# Also note that the JC suffx is if people were to concatenate tables, so change this to your own initals
+# ... Unless you have initials JC, in which case, JC2, maybe?
+example_table['JF_flag_JC'] = jf_flag_val
+example_table['tail_confidence_JC'] = tail_confid
+example_table['tail_angle_JC'] = tail_ang_val
 
 # Use these to check outputs
-print(JF_table.JF_flag_JC)
-print(JF_table.tail_confidence_JC)
-print(JF_table.tail_angle_JC)
+print(example_table.JF_flag_JC)
+print(example_table.tail_confidence_JC)
+print(example_table.tail_angle_JC)
 
+
+######################################################
 
 
 

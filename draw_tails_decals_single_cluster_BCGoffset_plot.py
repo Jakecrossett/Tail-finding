@@ -43,6 +43,11 @@ Update 30/12/2020:
 Included astropy sky coordinates to better calculate BCG offsets. This currently uses a single offset point, but
 can be easily changed to a BCG_coord column if necessary.
 
+Update 11/1/2021:
+Fixed deltaRA and deltaDec to use astropy coordinates. This means the lines will not appear to match the 
+final angles at high/low Declinations. The angles are converted based on the image having the declination dependance
+on the field of view.
+
 author: Jake Crossett
 """
 

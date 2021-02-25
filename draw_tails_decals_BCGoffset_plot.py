@@ -43,6 +43,11 @@ Update 30/12/2020:
 Included astropy sky coordinates to better calculate BCG offsets. This currently uses a single offset point, but
 can be easily changed to a BCG_coord column if necessary.
 
+Update 11/1/2021:
+Fixed deltaRA and deltaDec to use astropy coordinates. This means the lines will not appear to match the 
+final angles at high/low Declinations. The angles are converted based on the image having the declination dependance
+on the field of view.
+
 author: Jake Crossett
 """
 
@@ -243,7 +248,6 @@ Use x,y,z = drawtail_decals_RGB(RA,Dec) as the command to run it.
 
 # Load in example table using pandas
 # Can use other means (loadtxt, genfromtxt etc etc) which might be faster
-# example_table = pd.read_csv('Coma_JF_not_Roberts.csv')
 example_table = pd.read_csv('Example_tail_file.csv')
 
 
@@ -276,16 +280,10 @@ example_table['tail_angle_JC'] = tail_ang_val
 # Convert table coordinates into sky coordinates in astropy
 Coord_sky = SkyCoord(example_table.RA*u.deg, example_table.Dec*u.deg, frame='icrs')
 
-# If all galaxies are in a single cluster then input the centre position of the cluster
-# Mark in a BCG/central position
-# BCG_RA =  194.953054 # X-ray centre position of Coma
-# BCG_Dec = 27.980694
-# BCG_sky = SkyCoord(BCG_RA*u.deg, BCG_Dec*u.deg, frame='icrs') 
-
 # If you wanted to have separate BCG coordinates that are linked with the galaxy coordinates 
 # (need to be included as columns in the example table)
+# There exists a single cluster example version. Please use that if you have a single cluster
 BCG_sky = SkyCoord(example_table.BCGRA*u.deg, example_table.BCGDec*u.deg, frame='icrs')
-
 
 BCG_angle_sky = [] # Create the list to append to the base table later
 
@@ -298,7 +296,6 @@ for i in range(len(example_table)):
     
     # If the galaxy is the BCG, with a very small difference, then assume it's zero
     # In these cases, the tail angle = tail offset. BCGs shouldn't have tails though.
-    ## For a single cluster, don't iterate over dra[i] or ddec[i]
     if abs(dra[i].value) < 1e-8 and abs(ddec[i].value) < 1e-8:
         BCG_angle_sky.append(0.0)
     else:
@@ -306,8 +303,6 @@ for i in range(len(example_table)):
         # Also need to convert to degrees, and round it.
         # Make the ra a negative to match the cartesian way the angles are measured (left to right)
         BCG_angle_sky.append(round(180 * math.atan2(ddec[i].value,-(dra[i].value))/math.pi,0))
-        ## IF you wanted to have separate BCG coordinates that are linked with the galaxy coordinates
-        # BCG_angle_sky.append(round(180 * math.atan2(ddec.value,-(dra.value))/math.pi,0))
 
 example_table['BCG_angle_sky'] = BCG_angle_sky
 
@@ -361,7 +356,7 @@ plt.xlabel('Tail offset (degrees)')
 plt.ylabel('counts') 
 plt.tight_layout() 
 # Save it if you want
-# plt.savefig('Example_JF_tail_offset_nonRoberts.eps') 
+plt.savefig('Example_JF_tail_offset_JC.eps') 
 plt.show()       
 
 
