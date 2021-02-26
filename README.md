@@ -21,4 +21,8 @@ I've also included 2 example files, which demonstrate the format that needs to b
 - Example_table_Poggianti16.csv contains four ram pressure stripped galaxies from various WINGS clusters in the study of Poggianti et al., (2016). This file should be good to test any code that prefers multiple clusters.
 
 Other files:
+<<<<<<< HEAD
 - Angle_examples.pdf displays a graphic which highlights the angles I define in the various functions. Use it to help visualise what is being measured.
+=======
+- Angle_examples.pdf displays a graphic which highlights the angles I define in the various functions. Use it to help visualise what is being measured.
+>>>>>>> 8f2e44e946decda743a9a6d3ae9c5af1456dae68
