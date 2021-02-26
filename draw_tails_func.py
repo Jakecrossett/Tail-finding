@@ -3,14 +3,14 @@
 """
 Created on Tue Nov 17 13:34:30 2020
 
-Condensed version of draw_tails_decals without an example to plot the tail directions.
+Main function list for drawing tails. Does not run on its own, but is called by other codes.
 
 Takes user inputs to determine tail angles of galaxy images based on supplied RA and Dec coordinates.
 
 Returns 3 lists: jellyfish_classification (int), tail_confidence (int), and tail_angle (Float).
 
-Use: run draw_tails_decals_RGB.py (ensure the file is specified in the code)
-
+#########
+drawtail_decals_RGB:
 Requires two input columns of RA and Dec coordinates in decimal form. Must be the same length.
 The images are taken from the legacy survey image viewer based on these. If the images cannot be sourced,
 then check the internet connection or the Legacy survey server. Legacy survey will show a blank image if 
@@ -18,6 +18,7 @@ the image is outside of the legacy survey footprint. This image should be skippe
 
 The first step will ask users to confirm the image, and alter the field of view, to best see the image.
 This sources an image each time, so takes the longest time.
+#########
 
 The user input is based on questions which all need to be answered. 
 The user needs to confirm each galaxy before it will move on. Currently, the  entire input lists are looped over, 
@@ -51,25 +52,57 @@ Fixed deltaRA and deltaDec to use astropy coordinates. This means the lines will
 final angles at high/low Declinations. The angles are converted based on the image having the declination dependance
 on the field of view.
 
-author: Jake Crossett
+Update 26/2/2021:
+This script is now contains the working functions for all the codes. It is a required module to download to use for any
+different script. 
+The function drawtail_decals_RGB is the main code for downloading Legacy Survey RGB images from the internet to classify them
+(needs a connection to legacysurvey.org)
+
+
+author: Jacob P. Crossett
 """
-
-# Required libraries
-import math
-import numpy as np
-from matplotlib import pyplot as plt
-import io
-import requests
-from PIL import Image
-
-
-# Only needed for the CSV example. 
-# Can use other forms of input data if needed. I will always use pandas though
-import pandas as pd
-
 
 #### Function start ####
 def drawtail_decals_RGB(RA_col,Dec_col):
+    '''
+    Plots images of galaxies based on Legacy Survey cutout images to classify potential jellyfish 
+    features and tails. Will always attempt to acquire the image from Legacy Survey, but will show
+    a blank image if the coordiinates are outside the Legacy Survey footprint. 
+
+    Parameters
+    ----------
+    RA_col : float (RA decimal coordinates)
+        Input RA coodinates to look up for legacy survey images. Must be in decimal RA format,
+        and the same length as Dec_col
+    Dec_col : float (RA decimal coordinates)
+        Input Dec coodinates to look up for legacy survey images. Also used to determine the final 
+        angle of the tail, to adjust the RA to account for the spherical RA-Dec system.
+        Must be in decimal Dec format, and the same length as RA_col
+
+    Returns
+    -------
+    jellyfish_flag_list (list - int)
+        int describing if the galaxy is a jellyfish. Is 1 for a jellyfish, -1 for a merger
+        and 0 if neither. If the image is broken/can't be classified it is -2
+    tail_confidence (list - int)
+        int describing the strength of a jellyfish tail. 0 is used if no tail can be seen,
+        1 is for a potential/weak tail, and 2 for a prominent/obvious tail. If a galaxy 
+        is classified as a merger/null/not-jellyifsh, this is set to 0.
+    tail_angle_list (list - float)
+        The angle of the tail, taken from a line pointing east/to the right hand side 
+        (float between -179 and 180 degrees). Currently rounds this to 1 degree precision,
+        but is ouptut as float to allow higher precision if needed. If a galaxy 
+        is classified as a merger/null/not-jellyifsh, or no tail is seen, this is set to 0.
+    '''
+
+    # Required libraries
+    import math
+    import numpy as np
+    from matplotlib import pyplot as plt
+
+    import io
+    import requests
+    from PIL import Image
     
     # Check if the RA and Dec lists are the same size. End if they are not
     if len(RA_col) != len(Dec_col):
@@ -238,34 +271,35 @@ def drawtail_decals_RGB(RA_col,Dec_col):
                                       # Given 0 not a Jellyfish, so need to check the JF flag if there's a tail at 0.0
         
     return(jellyfish_flag_list,tail_confidence,tail_angle_list) #Returns all values
-##################################################################
+
+def drawtail_decals_testmessage():
+    # Testing feature to ensure only some functions are imported when using the example scripts.
+    print("I hope you don't see this")
+
+######################################################
 ######## This is an example use of the code ##########
+# Can use other forms of input data if needed. I will always use pandas though
+# import pandas as pd
 # Example useage# Load in example table using pandas
 # Can use other means (loadtxt, genfromtxt etc etc) which might be faster
-example_table = pd.read_csv('Coma_JF_not_Roberts.csv') # Load in table
+# example_table = pd.read_csv('Example_table_Poggianti16.csv') # Load in table
 
 # Run the function and output to variables
-jf_flag_val,tail_confid,tail_ang_val = drawtail_decals_RGB(example_table.RA,example_table.Dec)
+# jf_flag_val,tail_confid,tail_ang_val = drawtail_decals_RGB(example_table.RA,example_table.Dec)
 
 # Append the columns to the table and mark with my name in case of multiple classifiers
 # This step can probably be combined with the function, but I'm making it 2 steps
 # Also note that the JC suffx is if people were to concatenate tables, so change this to your own initals
 # ... Unless you have initials JC, in which case, JC2, maybe?
-example_table['JF_flag_JC'] = jf_flag_val
-example_table['tail_confidence_JC'] = tail_confid
-example_table['tail_angle_JC'] = tail_ang_val
+# example_table['JF_flag_JC'] = jf_flag_val
+# example_table['tail_confidence_JC'] = tail_confid
+# example_table['tail_angle_JC'] = tail_ang_val
 
 # Use these to check outputs
-print(example_table.JF_flag_JC)
-print(example_table.tail_confidence_JC)
-print(example_table.tail_angle_JC)
-
-
+# print(example_table.JF_flag_JC)
+# print(example_table.tail_confidence_JC)
+# print(example_table.tail_angle_JC)
 ######################################################
-
-
-
-
 
 
 
