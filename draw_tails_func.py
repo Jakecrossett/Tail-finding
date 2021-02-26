@@ -276,30 +276,7 @@ def drawtail_decals_testmessage():
     # Testing feature to ensure only some functions are imported when using the example scripts.
     print("I hope you don't see this")
 
-######################################################
-######## This is an example use of the code ##########
-# Can use other forms of input data if needed. I will always use pandas though
-# import pandas as pd
-# Example useage# Load in example table using pandas
-# Can use other means (loadtxt, genfromtxt etc etc) which might be faster
-# example_table = pd.read_csv('Example_table_Poggianti16.csv') # Load in table
 
-# Run the function and output to variables
-# jf_flag_val,tail_confid,tail_ang_val = drawtail_decals_RGB(example_table.RA,example_table.Dec)
-
-# Append the columns to the table and mark with my name in case of multiple classifiers
-# This step can probably be combined with the function, but I'm making it 2 steps
-# Also note that the JC suffx is if people were to concatenate tables, so change this to your own initals
-# ... Unless you have initials JC, in which case, JC2, maybe?
-# example_table['JF_flag_JC'] = jf_flag_val
-# example_table['tail_confidence_JC'] = tail_confid
-# example_table['tail_angle_JC'] = tail_ang_val
-
-# Use these to check outputs
-# print(example_table.JF_flag_JC)
-# print(example_table.tail_confidence_JC)
-# print(example_table.tail_angle_JC)
-######################################################
 
 
 
